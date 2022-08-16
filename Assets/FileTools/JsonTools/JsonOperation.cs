@@ -12,13 +12,9 @@ public class JsonOperation
     public static string GetFilePath(string fileName)
     {
         string filePath = "";
-#if UNITY_ANDROID
-            filePath = Application.persistentDataPath + "/" + fileName + ".json";
-#endif
-#if UNITY_EDITOR
-        filePath = "Assets/Resources/" + fileName + ".json";
-#endif
-        Debug.Log("filePath" + filePath);
+        filePath = Application.streamingAssetsPath + "/MatchDatas/" + fileName + ".json";
+
+        Debug.LogError("filePath" + filePath);
         return filePath;
     }
 
@@ -41,28 +37,18 @@ public class JsonOperation
     public static T ReadFile<T>(string fileName)
     {
 
-        FileInfo t = new FileInfo(fileName);
-        if (!t.Exists)
-        {
-            Debug.Log("can not find file");
-        }
-        StreamReader sr = null;
-
-        sr = File.OpenText(GetFilePath(fileName));
-
-        string json = sr.ReadToEnd();
+        TextAsset t = (TextAsset)Resources.Load("MatchDatas/" + fileName);
+        string json = t.text.ToString().Trim();
 
         T GameDataByJson = JsonUtility.FromJson<T>(json);
-        sr.Close();
-        sr.Dispose();
 
-        Debug.Log("读取完成");
+        Debug.LogError("读取完成");
 
         return GameDataByJson;
 
     }
 
-    public static void WriteFile<T>(string fileName,T GameDataToJson)
+    public static void WriteFile<T>(string fileName, T GameDataToJson)
     {
         string str = JsonUtility.ToJson(GameDataToJson);
 
@@ -70,7 +56,7 @@ public class JsonOperation
         byte[] bytes = new UTF8Encoding().GetBytes(str.ToString());
         fs.Write(bytes, 0, bytes.Length);
         fs.Close();
-        Debug.Log("写入完成");
+        Debug.LogError("写入完成");
     }
 
 }
