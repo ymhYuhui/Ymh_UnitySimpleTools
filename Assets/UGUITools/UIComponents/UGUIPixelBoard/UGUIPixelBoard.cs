@@ -1,3 +1,17 @@
+/*************
+因需求问题暂时封板不做
+整体思路：
+1.接到底层数据
+2.根据底层数据格式修改UI控件
+3.根据zoom缩放数据矩阵至高分辨率图片
+4.分别计算出左、右、全三个重心，并将数组中的位置映射至position
+5.根据底层值按一定梯度给板子对应像素颜色（可能有更好看的方法？）
+6.画出对应的颜色，并画出重心连线
+todo:
+1. 缩放还没写完
+2. 组件的生命周期管理，入口函数设计 
+******/
+
 using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +24,7 @@ public class UGUIPixelBoard : MonoBehaviour
     private byte[,] valueMatrix; // 输入的板子数值
 
     [Header("面板")]
-    public RawImage Board;
+    public RawImage board;
     public int zoom;
 
     [Tooltip("面板颜色梯度")]
@@ -60,6 +74,8 @@ public class UGUIPixelBoard : MonoBehaviour
     #region BoardBehavior
     public void InitBoard()
     {
+        Texture2D boardTtexture = new Texture2D(BASE_COLUMN_SIZE, BASE_RAW_SIZE, TextureFormat.RGBA32, true);
+        this.board.texture = boardTtexture;
     }
     /// <summary>
     /// 该函数按数据源帧率实时调用 TODO：
@@ -97,11 +113,6 @@ public class UGUIPixelBoard : MonoBehaviour
         DrawPoint(leftPoint, GetBarycentricIndex(leftValueMatrix));
         DrawPoint(rightPoint, GetBarycentricIndex(rightValueMatrix));
         DrawPoint(wholePoint, GetBarycentricIndex(valueMatrix));
-    }
-
-    void DrawGravityCenter()
-    {
-
     }
 
     void DrawLine(GameObject line, Vector2 startPosition, Vector2 endPosition)
@@ -195,6 +206,11 @@ public class UGUIPixelBoard : MonoBehaviour
         return color32;
     }
 
+    /// <summary>
+    /// 缩放值矩阵
+    /// </summary>
+    /// <param name="valueMatrix"></param>
+    /// <returns></returns>
     byte[,] ZoomValueMatrix(byte[,] valueMatrix)
     {
         byte[,] bytes = new byte[BASE_RAW_SIZE * zoom, BASE_COLUMN_SIZE * zoom];
